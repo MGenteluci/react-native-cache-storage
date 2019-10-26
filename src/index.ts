@@ -44,7 +44,7 @@ export default class CacheStorage {
   }
 
   async setItem(key: string, ttl: number = 300): Promise<void> {
-    const cacheItem: CacheItem = { key, ttl, createdAt: new Date() };
+    const cacheItem: CacheItem = { key, ttl, createdAt: moment().toDate() };
 
     const stringifiedCacheItem = JSON.stringify(cacheItem);
     await AsyncStorage.setItem(key, stringifiedCacheItem);
@@ -62,7 +62,6 @@ export default class CacheStorage {
   }
 
   private replaceItem(unsavedItem: CacheItem): void {
-    console.log('wont replace item')
     this.items = this.items.map(item => {
       const savedItem: CacheItem = JSON.parse(item);
 
@@ -72,7 +71,10 @@ export default class CacheStorage {
   }
 
   async clear(): Promise<void> {
-    await AsyncStorage.clear();
+    await Promise.all(this.items.map(async item => {
+      const cacheItem: CacheItem = JSON.parse(item);
+      await AsyncStorage.removeItem(cacheItem.key);
+    }));
     this.items = [];
   }
 }
