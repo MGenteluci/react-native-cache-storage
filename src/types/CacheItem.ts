@@ -1,5 +1,5 @@
 type CacheItem = {
-  key: string;
+  value: string;
   ttl: number;
   createdAt: Date;
 };

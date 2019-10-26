@@ -20,46 +20,47 @@ describe('CacheStorage', () => {
 
   describe('getItem', () => {
     it('given: key is myRandomKey; ' +
-      'when: key doesnt exists in memory or storage' +
+      'when: key doesnt exists in memory or storage; ' +
       'then: return null', async () => {
       const result = await cacheStorage.getItem('myRandomKey');
       expect(result).toBeNull();
     });
 
     it('given: key is myRandomKey; ' +
-      'when: key exists in memory' +
+      'when: key exists in memory; ' +
       'then: return key', async () => {
       // @ts-ignore
-      cacheStorage.items = [
-        JSON.stringify({ key: 'myRandomKey', ttl: 100, createdAt: new Date() }),
-        JSON.stringify({ key: 'elseKey', ttl: 100, createdAt: new Date() })
-      ];
+      cacheStorage.memoryStorage = {
+        myRandomKey: { value: 'random', ttl: 100, createdAt: new Date() },
+        elseKey: { value: 'else', ttl: 100, createdAt: new Date() }
+      };
 
       const result = await cacheStorage.getItem('myRandomKey');
-      expect(result).toBe('myRandomKey');
+      expect(result).toBe('random');
     });
 
     it('given: key is myRandomKey; ' +
-      'when: key exists in memory but is expired' +
-      'then: return null', async () => {
+      'when: key exists in memory but is expired; ' +
+      'then: remove key from storage and return null', async () => {
       // @ts-ignore
-      cacheStorage.items = [
-        JSON.stringify({ key: 'myRandomKey', ttl: 100, createdAt: new Date(2018, 8, 10) })
-      ];
+      cacheStorage.memoryStorage = {
+        myRandomKey: { value: 'random', ttl: 100, createdAt: new Date(2018, 8, 10) }
+      };
 
       const result = await cacheStorage.getItem('myRandomKey');
       expect(result).toBeNull();
+      expect(AsyncStorage.removeItem).toBeCalledWith('myRandomKey');
     });
 
     it('given: key is myRandomKey; ' +
-      'when: key doesnt exists memory but exists in storage' +
+      'when: key doesnt exist in memory but exists in storage; ' +
       'then: return key', async () => {
       jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue(
-        JSON.stringify({ key: 'myRandomKey', ttl: 100, createdAt: new Date() })
+        JSON.stringify({ value: 'random', ttl: 100, createdAt: new Date() })
       );
 
       const result = await cacheStorage.getItem('myRandomKey');
-      expect(result).toBe('myRandomKey');
+      expect(result).toBe('random');
       expect(AsyncStorage.getItem).toBeCalledWith('myRandomKey');
     });
 
@@ -68,7 +69,7 @@ describe('CacheStorage', () => {
       'then: return null', async () => {
       jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue(
         JSON.stringify(
-          { key: 'myRandomKey', ttl: 100, createdAt: new Date(2018, 12, 11) }
+          { value: 'random', ttl: 100, createdAt: new Date(2018, 12, 11) }
         )
       );
 
@@ -86,15 +87,14 @@ describe('CacheStorage', () => {
       // @ts-ignore
       jest.spyOn(Date, 'now').mockReturnValue(mockDate);
 
-      const item = JSON.stringify({ key: 'myRandomKey', ttl: 100, createdAt: mockDate });
+      const item = { value: 'valueTest', ttl: 100, createdAt: mockDate };
+      const expectedSetItemParam = JSON.stringify(item);
+      const expectedMemoryStorage = { myRandomKey: item };
 
-      const expectedSetItemParam = item;
-      const expectedItems = [item];
-
-      await cacheStorage.setItem('myRandomKey', 100);
+      await cacheStorage.setItem('myRandomKey', 'valueTest', 100);
       expect(AsyncStorage.setItem).toBeCalledWith('myRandomKey', expectedSetItemParam);
       // @ts-ignore
-      expect(cacheStorage.items).toStrictEqual(expectedItems);
+      expect(cacheStorage.memoryStorage).toStrictEqual(expectedMemoryStorage);
     });
   });
 
@@ -102,16 +102,17 @@ describe('CacheStorage', () => {
     it('given: there are two itens in memory; ' +
       'when: clear(); ' +
       'then: remove items from memory and storage.', async() => {
-      const item1 = JSON.stringify({ key: 'key1', ttl: 100, createdAt: new Date() });
-      const item2 = JSON.stringify({ key: 'key2', ttl: 100, createdAt: new Date() });
       // @ts-ignore
-      cacheStorage.items = [item1, item2];
+      cacheStorage.memoryStorage = {
+        key1: { value: 'value1', ttl: 100, createdAt: new Date() },
+        key2: { value: 'value2', ttl: 100, createdAt: new Date() }
+      };
 
       await cacheStorage.clear();
       expect(AsyncStorage.removeItem).toHaveBeenNthCalledWith(1, 'key1');
       expect(AsyncStorage.removeItem).toHaveBeenNthCalledWith(2, 'key2');
       // @ts-ignore
-      expect(cacheStorage.items).toStrictEqual([]);
+      expect(cacheStorage.memoryStorage).toStrictEqual({});
     });
   });
 });

@@ -1,80 +1,62 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import moment from 'moment';
 import CacheItem from './types/CacheItem';
+import MemoryStorage from './types/MemoryStorage';
 
 export default class CacheStorage {
-  private items: string[];
+  private memoryStorage: MemoryStorage;
 
   constructor() {
-    this.items = [];
+    this.memoryStorage = {};
   }
 
   async getItem(key: string): Promise<string | null> {
-    const item = this.items.reduce(
-      (acc: CacheItem, current: string) => {
-        const cacheItem: CacheItem = JSON.parse(current);
+    const item: CacheItem = this.memoryStorage[key];
 
-        if (cacheItem.key === key) return { ...acc, ...cacheItem };
-        return { ...acc };
-      },
-      <CacheItem>{}
-    );
-
-    if (item.key) {
+    if (item) {
       const isKeyExpired = moment(item.createdAt)
         .add(item.ttl, 'seconds')
         .isBefore(new Date());
 
-      return isKeyExpired ? null : item.key;
+      if (isKeyExpired) {
+        await AsyncStorage.removeItem(key);
+        return null;
+      }
+
+      return item.value;
     }
 
     const storageItem = await AsyncStorage.getItem(key);
 
     if (storageItem) {
-      const parsedItem: CacheItem = JSON.parse(storageItem);
+      const cacheItem: CacheItem = JSON.parse(storageItem);
 
-      const isKeyExpired = moment(parsedItem.createdAt)
-        .add(parsedItem.ttl, 'seconds')
+      const isKeyExpired = moment(cacheItem.createdAt)
+        .add(cacheItem.ttl, 'seconds')
         .isBefore(new Date());
 
-      return isKeyExpired ? null : parsedItem.key;
+      return isKeyExpired ? null : cacheItem.value;
     }
 
     return null;
   }
 
-  async setItem(key: string, ttl: number = 300): Promise<void> {
-    const cacheItem: CacheItem = { key, ttl, createdAt: moment().toDate() };
+  async setItem(key: string, value: string, ttl: number = 300): Promise<void> {
+    const cacheItem: CacheItem = { value, ttl, createdAt: moment().toDate() };
 
     const stringifiedCacheItem = JSON.stringify(cacheItem);
     await AsyncStorage.setItem(key, stringifiedCacheItem);
 
-    if (this.isKeySaved(key)) this.replaceItem(cacheItem);
-    else this.items.push(stringifiedCacheItem);
-  }
-
-  private isKeySaved(key: string): boolean {
-    return this.items.some(item => {
-      const cacheItem: CacheItem = JSON.parse(item);
-
-      return cacheItem.key === key;
-    });
-  }
-
-  private replaceItem(unsavedItem: CacheItem): void {
-    this.items = this.items.map(item => {
-      const savedItem: CacheItem = JSON.parse(item);
-
-      if (savedItem.key === unsavedItem.key) return JSON.stringify(unsavedItem);
-      return item;
-    });
+    this.memoryStorage = { ...this.memoryStorage, [key]: cacheItem };
   }
 
   async clear(): Promise<void> {
-    await Promise.all(this.items.map(async item => {
-      const cacheItem: CacheItem = JSON.parse(item);
-      await AsyncStorage.removeItem(cacheItem.key);
+    const keys = Object.keys(this.memoryStorage);
+
+    await Promise.all(keys.map(async key => {
+      await AsyncStorage.removeItem(key);
     }));
-    this.items = [];
+
+    this.memoryStorage = {};
   }
 }
