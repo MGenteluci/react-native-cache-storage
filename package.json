@@ -1,6 +1,6 @@
 {
   "name": "react-native-cache-storage",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -11,7 +11,11 @@
     "pre:build": "npm test && rm -rf ./lib",
     "build": "npm run pre:build && tsc"
   },
-  "keywords": ["cache", "storage", "react-native"],
+  "keywords": [
+    "cache",
+    "storage",
+    "react-native"
+  ],
   "author": "Matheus Genteluci <mgenteluci97@gmail.com>",
   "license": "MIT",
   "devDependencies": {
