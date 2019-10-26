@@ -17,6 +17,11 @@ const cacheStorage = new CacheStorage();
 setItem(key: string, value: string, ttl?: number): Promise<void>;
 ```
 
+* ttl:
+  - in seconds
+  - default: `300`
+  - if `0` is informed item will never expire.
+
 ### getItem
 
 ```js
