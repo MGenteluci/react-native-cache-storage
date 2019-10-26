@@ -14,11 +14,7 @@ export default class CacheStorage {
     const item: CacheItem = this.memoryStorage[key];
 
     if (item) {
-      const isKeyExpired = moment(item.createdAt)
-        .add(item.ttl, 'seconds')
-        .isBefore(new Date());
-
-      if (isKeyExpired) {
+      if (this.isItemExpired(item)) {
         await AsyncStorage.removeItem(key);
         return null;
       }
@@ -31,11 +27,12 @@ export default class CacheStorage {
     if (storageItem) {
       const cacheItem: CacheItem = JSON.parse(storageItem);
 
-      const isKeyExpired = moment(cacheItem.createdAt)
-        .add(cacheItem.ttl, 'seconds')
-        .isBefore(new Date());
+      if (this.isItemExpired(cacheItem)) {
+        await AsyncStorage.removeItem(key);
+        return null;
+      }
 
-      return isKeyExpired ? null : cacheItem.value;
+      return cacheItem.value;
     }
 
     return null;
@@ -58,5 +55,11 @@ export default class CacheStorage {
     }));
 
     this.memoryStorage = {};
+  }
+
+  private isItemExpired(item: CacheItem): boolean {
+    if (item.ttl === 0) return false;
+
+    return moment(item.createdAt).add(item.ttl, 'seconds').isBefore(new Date());
   }
 }
