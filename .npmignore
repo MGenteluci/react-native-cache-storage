@@ -1,0 +1,10 @@
+# Ignore
+.github
+.vscode
+coverage
+node_modules
+src
+test
+
+# Don't ignore
+!lib
