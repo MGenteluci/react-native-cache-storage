@@ -53,6 +53,19 @@ describe('CacheStorage', () => {
     });
 
     it('given: key is myRandomKey; ' +
+      'when: key exist in memory and is old but ttl is 0; ' +
+      'then: return value', async () => {
+      // @ts-ignore
+      cacheStorage.memoryStorage = {
+        myRandomKey: { value: 'notExpired', ttl: 0, createdAt: new Date(2018, 8, 10) }
+      };
+
+      const result = await cacheStorage.getItem('myRandomKey');
+      expect(result).toBe('notExpired');
+      expect(AsyncStorage.removeItem).not.toBeCalled();
+    });
+
+    it('given: key is myRandomKey; ' +
       'when: key doesnt exist in memory but exists in storage; ' +
       'then: return key', async () => {
       jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue(
@@ -65,8 +78,8 @@ describe('CacheStorage', () => {
     });
 
     it('given: key is myRandomKey; ' +
-      'when: key doesnt exists memory but exists in storage and is expired' +
-      'then: return null', async () => {
+      'when: key doesnt exist in memory but exist in storage and is expired' +
+      'then: remove key from AsyncStorage and return null', async () => {
       jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue(
         JSON.stringify(
           { value: 'random', ttl: 100, createdAt: new Date(2018, 12, 11) }
@@ -76,6 +89,22 @@ describe('CacheStorage', () => {
       const result = await cacheStorage.getItem('myRandomKey');
       expect(result).toBeNull();
       expect(AsyncStorage.getItem).toBeCalledWith('myRandomKey');
+      expect(AsyncStorage.removeItem).toBeCalledWith('myRandomKey');
+    });
+
+    it('given: key is myRandomKey; ' +
+      'when: key exist in storage and is old but ttl is 0; ' +
+      'then: return value', async () => {
+      jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue(
+        JSON.stringify(
+          { value: 'notExpired', ttl: 0, createdAt: new Date(2018, 12, 11) }
+        )
+      );
+
+      const result = await cacheStorage.getItem('myRandomKey');
+      expect(result).toBe('notExpired');
+      expect(AsyncStorage.getItem).toBeCalledWith('myRandomKey');
+      expect(AsyncStorage.removeItem).not.toBeCalled();
     });
   });
 
