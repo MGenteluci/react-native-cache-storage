@@ -22,7 +22,7 @@ jobs:
           name: coverage-report
           path: coverage/lcov-report/index.html
       - name: Upload build
-        if: GITHUB.REF == 'master'
+        # if: GITHUB.REF == 'master'
         uses: actions/upload-artifact@v1
         with:
           name: lib
