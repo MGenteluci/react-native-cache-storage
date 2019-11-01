@@ -15,7 +15,7 @@ jobs:
       - name: Build TS
         run: npm run build
       - name: Upload build
-        # if: GITHUB.REF == 'master'
+        if: GITHUB.REF == 'master'
         uses: actions/upload-artifact@v1
         with:
           name: lib
@@ -39,7 +39,7 @@ jobs:
           file: ./coverage/lcov-report/index.html
 
   deploy:
-    # if: GITHUB.REF == 'master'
+    if: GITHUB.REF == 'master'
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
