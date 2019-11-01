@@ -1,6 +1,6 @@
 # Cache Storage
 
-![build](https://github.com/mgenteluci/react-native-cache-storage/workflows/build%20deploy/badge.svg)
+![pipeline](https://github.com/mgenteluci/react-native-cache-storage/workflows/deploy/badge.svg)
 
 Cache Storage is a key value storage build on top of AsyncStorage, it uses
 a combination of memory and AsyncStorage to provide fast responses.

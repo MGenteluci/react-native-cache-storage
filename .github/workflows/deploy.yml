@@ -1,4 +1,4 @@
-name: build & deploy
+name: pipeline
 
 on: [push, pull_request]
 
@@ -14,23 +14,32 @@ jobs:
         run: npm ci
       - name: Build TS
         run: npm run build
-      - name: Run tests
-        run: npm test
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v1
-        with:
-          name: coverage-report
-          path: coverage/lcov-report/index.html
       - name: Upload build
         # if: GITHUB.REF == 'master'
         uses: actions/upload-artifact@v1
         with:
-          name: lib
+          name: build
           path: lib/
 
-  deploy:
-    if: GITHUB.REF == 'master'
+  test:
     needs: build
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10
+      - name: Clean install
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - uses: codecov/codecov-action@v1.0.3
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: ./coverage/lcov-report/index.html
+
+  deploy:
+    # if: GITHUB.REF == 'master'
+    needs: [build, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -38,6 +47,11 @@ jobs:
         with:
           node-version: 10
           registry-url: https://registry.npmjs.org/
+      - name: Download build artifacts
+        uses: actions/download-artifact@master
+        with:
+          name: build
+      - run: ls
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
