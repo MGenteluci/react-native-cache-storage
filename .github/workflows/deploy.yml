@@ -18,7 +18,7 @@ jobs:
         # if: GITHUB.REF == 'master'
         uses: actions/upload-artifact@v1
         with:
-          name: build
+          name: lib
           path: lib/
 
   test:
@@ -47,7 +47,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@master
         with:
-          name: build
+          name: lib
       - uses: actions/setup-node@v1
         with:
           node-version: 10

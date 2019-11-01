@@ -1,11 +1,11 @@
 {
   "name": "react-native-cache-storage",
-  "version": "0.0.4-alpha.1",
+  "version": "0.0.4-alpha.2",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest",
     "test:unit": "jest test/unit",
     "open:coverage": "npm test && google-chrome ./coverage/lcov-report/index.html",
     "pre:build": "rm -rf ./lib",
