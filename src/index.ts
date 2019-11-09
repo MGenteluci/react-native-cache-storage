@@ -57,6 +57,15 @@ export default class CacheStorage {
     }));
   }
 
+  async multiSet(keyValuePairs: string[][], ttl: number = 300): Promise<void> {
+    await Promise.all(keyValuePairs.map(async([key, value]) => {
+      const cacheItem = { value, ttl, createdAt: moment().toDate() };
+      this.memoryStorage[key] = cacheItem;
+
+      await AsyncStorage.setItem(key, JSON.stringify(cacheItem));
+    }));
+  }
+
   private isItemExpired(item: CacheItem): boolean {
     if (item.ttl === 0) return false;
 
