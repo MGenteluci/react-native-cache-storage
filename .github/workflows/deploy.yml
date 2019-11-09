@@ -1,9 +1,26 @@
-name: pipeline
+name: deploy
 
 on: [push, pull_request]
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10
+      - name: Clean install
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - uses: codecov/codecov-action@v1.0.3
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: ./coverage/lcov-report/index.html
+
   build:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -21,26 +38,9 @@ jobs:
           name: lib
           path: lib/
 
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 10
-      - name: Clean install
-        run: npm ci
-      - name: Run tests
-        run: npm test
-      - uses: codecov/codecov-action@v1.0.3
-        with:
-          token: ${{secrets.CODECOV_TOKEN}}
-          file: ./coverage/lcov-report/index.html
-
   deploy:
     if: GITHUB.REF == 'master'
-    needs: [build, test]
+    needs: [test, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
