@@ -50,11 +50,11 @@ export default class CacheStorage {
   async clear(): Promise<void> {
     const keys = Object.keys(this.memoryStorage);
 
+    this.memoryStorage = {};
+
     await Promise.all(keys.map(async key => {
       await AsyncStorage.removeItem(key);
     }));
-
-    this.memoryStorage = {};
   }
 
   private isItemExpired(item: CacheItem): boolean {
