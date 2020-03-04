@@ -1,14 +1,14 @@
 {
   "name": "react-native-cache-storage",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest",
     "test:unit": "jest test/unit",
-    "open:coverage": "npm run test && google-chrome ./coverage/lcov-report/index.html",
-    "pre:build": "npm test && rm -rf ./lib",
+    "open:coverage": "npm test && google-chrome ./coverage/lcov-report/index.html",
+    "pre:build": "rm -rf ./lib",
     "build": "npm run pre:build && tsc"
   },
   "keywords": [
@@ -21,6 +21,7 @@
   "devDependencies": {
     "@react-native-community/async-storage": "^1.6.2",
     "@types/jest": "^24.0.19",
+    "codecov": "^3.6.1",
     "eslint": "^6.5.1",
     "jest": "^24.9.0",
     "ts-jest": "^24.1.0",

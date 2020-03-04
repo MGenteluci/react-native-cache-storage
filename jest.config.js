@@ -4,6 +4,8 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!(@react-native-community|react-native)/)'
   ],
+  collectCoverage: true,
+  coverageDirectory: './coverage/',
   coverageThreshold: {
     global: {
       branches: 80,

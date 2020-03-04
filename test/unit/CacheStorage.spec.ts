@@ -144,4 +144,28 @@ describe('CacheStorage', () => {
       expect(cacheStorage.memoryStorage).toStrictEqual({});
     });
   });
+
+  describe('multiSet', () => {
+    it('given: keyValuePairs is [["key1", "value1"], ["key2", "value2"]]; ' +
+      'when: multiSet(keyValuePairs, 700); ' +
+      'then: add pairs to memory and storage with ttl 700.', async () => {
+      const mockDate = new Date(2019, 10, 26, 0, 0, 0, 0);
+      // @ts-ignore
+      jest.spyOn(Date, 'now').mockReturnValue(mockDate);
+
+      const item1 = { value: 'value1', ttl: 700, createdAt: mockDate };
+      const item2 = { value: 'value2', ttl: 700, createdAt: mockDate };
+      const expectedMemoryStorage = {
+        key1: item1,
+        key2: item2
+      };
+
+      const keyValuePairs = [['key1', 'value1'], ['key2', 'value2']];
+      await cacheStorage.multiSet(keyValuePairs, 700);
+      expect(AsyncStorage.setItem).toHaveBeenNthCalledWith(1, 'key1', JSON.stringify(item1));
+      expect(AsyncStorage.setItem).toHaveBeenNthCalledWith(2, 'key2', JSON.stringify(item2));
+      // @ts-ignore
+      expect(cacheStorage.memoryStorage).toStrictEqual(expectedMemoryStorage);
+    });
+  });
 });

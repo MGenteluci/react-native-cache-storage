@@ -50,11 +50,20 @@ export default class CacheStorage {
   async clear(): Promise<void> {
     const keys = Object.keys(this.memoryStorage);
 
+    this.memoryStorage = {};
+
     await Promise.all(keys.map(async key => {
       await AsyncStorage.removeItem(key);
     }));
+  }
 
-    this.memoryStorage = {};
+  async multiSet(keyValuePairs: string[][], ttl: number = 300): Promise<void> {
+    await Promise.all(keyValuePairs.map(async([key, value]) => {
+      const cacheItem = { value, ttl, createdAt: moment().toDate() };
+      this.memoryStorage[key] = cacheItem;
+
+      await AsyncStorage.setItem(key, JSON.stringify(cacheItem));
+    }));
   }
 
   private isItemExpired(item: CacheItem): boolean {

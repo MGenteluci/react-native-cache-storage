@@ -1,5 +1,8 @@
 # Cache Storage
 
+![coverage](https://codecov.io/gh/MGenteluci/react-native-cache-storage)
+![pipeline](https://github.com/mgenteluci/react-native-cache-storage/workflows/deploy/badge.svg)
+
 Cache Storage is a key value storage build on top of AsyncStorage, it uses
 a combination of memory and AsyncStorage to provide fast responses.
 
@@ -28,6 +31,12 @@ setItem(key: string, value: string, ttl?: number): Promise<void>;
 getItem(key: string): Promise<string | null>;
 ```
 
+### multiSet
+
+```js
+multiSet(keyValuePairs: string[][], ttl: number = 300): Promise<void>;
+```
+
 ### clear
 
 Remove all keys saved in CacheStorage.
@@ -36,4 +45,4 @@ Remove all keys saved in CacheStorage.
 clear(): Promise<void>;
 ```
 
-`Does not affect other keys saved in AsyncStorage`
+`Only affect keys saved by CacheStorage`
