@@ -31,6 +31,12 @@ setItem(key: string, value: string, ttl?: number): Promise<void>;
 getItem(key: string): Promise<string | null>;
 ```
 
+### multiSet
+
+```js
+multiSet(keyValuePairs: string[][], ttl: number = 300): Promise<void>;
+```
+
 ### clear
 
 Remove all keys saved in CacheStorage.
