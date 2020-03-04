@@ -1,6 +1,9 @@
-name: deploy
+name: PushToMaster
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   test:
@@ -32,14 +35,12 @@ jobs:
       - name: Build TS
         run: npm run build
       - name: Upload build
-        if: GITHUB.REF == 'master'
         uses: actions/upload-artifact@v1
         with:
           name: lib
           path: lib/
 
   deploy:
-    if: GITHUB.REF == 'master'
     needs: [test, build]
     runs-on: ubuntu-latest
     steps:
